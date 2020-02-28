@@ -116,6 +116,10 @@ components:
           type: string
           description: |
             The name of the item that is part of the order.
+        quantity:
+          type: number
+          description: |
+            The number of items to
         price:
           type: number
           description: |
@@ -145,7 +149,7 @@ components:
           type: number
           description: |
             The amount of discount to apply, can be either a percent: 5% would be 0.05 or an amount: $1 would be 1
-        apply_to_uuid:
+        apply_to:
           type: string
           description: |
             The uuid to apply the discount to. This could be for the order or a single line item.

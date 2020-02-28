@@ -6,23 +6,168 @@ The order schema is defined in the orders_api.yml file in this directory. This f
 
 ## Creating an Order
 An order can be created by sending a `POST` request to your api. After an order has been created it can be retrieved through a `GET` request with a uuid in the url.
+```
+POST /orders
+{
+  uuid: 'a76ee7b0-7f9e-4443-899c-f4be0faddee3',
+  line_items: [
+    {
+      uuid: '7cd7f0ef-8265-4593-95ea-dd7c2bb6396d',
+      name: 'Hamburger',
+      price: 875,
+      tax_rate: 0.0625
+    },
+    {
+      uuid: '6d419f88-b53f-49e2-af0a-832444d6ed41',
+      name: 'Water',
+      price: 235,
+      tax_rate: 0.0625
+    },
+    {
+      uuid: '47dfb3e6-b892-40b8-9ce6-f769c6e15537',
+      name: 'Beer',
+      price: 1025,
+      tax_rate: 0.0825
+    }
+  ],
+  discounts: [
+    {
+      uuid: '88140f25-f314-493b-ad81-32932f1ae4cc',
+      name: '$1 off beer',
+      type: 'amount',
+      amount: 100,
+      apply_to: '47dfb3e6-b892-40b8-9ce6-f769c6e15537'
+    },
+    {
+      uuid: 'b1d52ea0-141b-4363-a42d-3bbd0b851222',
+      name: '10% membership discount',
+      type: 'percent',
+      amount: 0.10,
+      apply_to: 'a76ee7b0-7f9e-4443-899c-f4be0faddee3'
+    }
+  ]
+}
+```
 
 ## Adding a LineItem to an Order
 A LineItem can be added to an order through the `PUT /orders/:uuid` endpoint
+```
+PUT /orders/a76ee7b0-7f9e-4443-899c-f4be0faddee3
+{
+  line_items: [
+    {
+      uuid: '7cd7f0ef-8265-4593-95ea-dd7c2bb6396d',
+      name: 'Hot Dog',
+      price: 475,
+      tax_rate: 0.0625
+    }
+  ]
+}
+```
 
 ## Adding a Discount to an Order
 A discount can be added to an order through the `PUT /orders/:uuid` endpoint. This can be done alongside line items or separately.
 A discount can be applied to a single item or to the order as a whole.
 A discount can be a percentage or an amount.
+```
+POST /orders/a76ee7b0-7f9e-4443-899c-f4be0faddee3
+{
+  discounts: [
+    {
+      uuid: 'b1d52ea0-141b-4363-a42d-3bbd0b851222',
+      name: '10% membership discount',
+      type: 'percent',
+      amount: 0.10,
+      apply_to: 'a76ee7b0-7f9e-4443-899c-f4be0faddee3'
+    }
+  ]
+}
+```
 
 ## Calculating Tax on an Order
 All returns of an order should have correctly calculated the tax for that order. The valid result should take into account the tax rates or lack of tax rates on specific items.
+```
+{
+  uuid: 'a76ee7b0-7f9e-4443-899c-f4be0faddee3',
+  line_items: [
+    {
+      uuid: '7cd7f0ef-8265-4593-95ea-dd7c2bb6396d',
+      name: 'Hamburger',
+      price: 875,
+      tax_rate: 0.0625
+    },
+    {
+      uuid: '6d419f88-b53f-49e2-af0a-832444d6ed41',
+      name: 'Water',
+      price: 235,
+      tax_rate: 0.0625
+    },
+    {
+      uuid: '47dfb3e6-b892-40b8-9ce6-f769c6e15537',
+      name: 'Beer',
+      price: 1025,
+      tax_rate: 0.0825
+    }
+  ],
+  tax_total: 154,
+  total: 2289
+}
+```
 
 ## Calculating the total of an Order
-All returns of an order from the api should have a correctly calculated total of the order. The following criteria is how an order total should be calcualted:
-1. Apply discounts
+All returns of an order from the api should have a correctly calculated total of the order. The following criteria is how an order total should be calculated:
+1. Apply order discounts
+2. Apply line item discounts
 2. Apply taxes
 3. Rounding should be done to the closest penny.
+```
+POST /orders
+{
+  uuid: 'a76ee7b0-7f9e-4443-899c-f4be0faddee3',
+  line_items: [
+    {
+      uuid: '7cd7f0ef-8265-4593-95ea-dd7c2bb6396d',
+      quantity: 1,
+      name: 'Hamburger',
+      price: 875,
+      tax_rate: 0.0625
+    },
+    {
+      uuid: '6d419f88-b53f-49e2-af0a-832444d6ed41',
+      name: 'Water',
+      quantity: 1,
+      price: 235,
+      tax_rate: 0.0625
+    },
+    {
+      uuid: '47dfb3e6-b892-40b8-9ce6-f769c6e15537',
+      name: 'Beer',
+      quantity: 1,
+      price: 1025,
+      tax_rate: 0.0825
+    }
+  ],
+  discounts: [
+    {
+      uuid: '88140f25-f314-493b-ad81-32932f1ae4cc',
+      name: '$1 off beer',
+      type: 'amount',
+      amount: 100,
+      apply_to: '47dfb3e6-b892-40b8-9ce6-f769c6e15537'
+    },
+    {
+      uuid: 'b1d52ea0-141b-4363-a42d-3bbd0b851222',
+      name: '10% membership discount',
+      type: 'percent',
+      amount: 0.10,
+      apply_to: 'a76ee7b0-7f9e-4443-899c-f4be0faddee3'
+    }
+  ],
+  tax_total: 132,
+  total: 1954
+}
+```
+
 
 ## Assumptions
 * You can assume that you will transact in USD.
@@ -32,9 +177,6 @@ All returns of an order from the api should have a correctly calculated total of
 * An order total should never go below 0
 
 ## Technical Requirements
-* Your code should have included tests.
-* Your code should be properly linted (include your linter with your code submission).
-* Your code should be well architected: Separation of Concerns, Extendible.
 * Your API should be publicly available for us to test.
 
 ## Questions
