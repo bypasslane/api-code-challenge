@@ -70,7 +70,7 @@ A discount can be added to an order through the `PUT /orders/:uuid` endpoint. Th
 A discount can be applied to a single item or to the order as a whole.
 A discount can be a percentage or an amount.
 ```
-POST /orders/a76ee7b0-7f9e-4443-899c-f4be0faddee3
+PUT /orders/a76ee7b0-7f9e-4443-899c-f4be0faddee3
 {
   discounts: [
     {
